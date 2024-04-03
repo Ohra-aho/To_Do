@@ -36,10 +36,13 @@ type buttonProp = {
 	action: () => void
 }
 type actionProp = {
-	action: (string: string) => void
+	action: (parameter: any) => void
 }
 type ToDoProp = {
 	toDos: ToDo[]
+}
+type numberProp = {
+	x: number
 }
 
 
@@ -63,7 +66,10 @@ function App(): React.JSX.Element {
 
   return (
 		<View style={styles.background}>
-			<TaskContainer toDos={{toDos}}></TaskContainer>
+			<TaskContainer toDos={{toDos}} action={{action:(x: number) => {
+				const updatedToDos = [...toDos.slice(0, x), ...toDos.slice(x + 1)];
+				setToDos(updatedToDos);
+			}}}></TaskContainer>
 			<Controller action={{action:(name: string) => {
 				const updatedToDos = [...toDos, new ToDo(name)];
           		setToDos(updatedToDos);
@@ -99,22 +105,25 @@ function Controller(props: {action: actionProp}) {
 		</View>
 }
 
-function TaskContainer(props: {toDos: ToDoProp}) {
-
+function TaskContainer(props: {toDos: ToDoProp, action: actionProp}) {
+	
 	return <View style={styles.taskContainer}>
 		{props.toDos.toDos.map((todo, index) => (
-        <Task text={todo.name}></Task>
+        <Task text={{text: todo.name}} x={{x: index}} action={props.action}></Task>
       ))}
 	</View>
 }
 
-function Task(props: textProp) {
-	const [name, setName] = useState(props.text)
+function Task(props: {text: textProp, x: numberProp, action: actionProp}) {
+	function remove() {
+		props.action.action(props.x.x)
+	}
+
 	return <View style={styles.task}>
 		<View style={{width: 200}}>
-			<Text style={{fontSize: 20}}>{name}</Text>
+			<Text style={{fontSize: 20}}>{props.text.text + " " + props.x.x}</Text>
 		</View>
-		<TouchableOpacity onPress={() => console.log("Delete")}
+		<TouchableOpacity onPress={remove}
 				style={styles.taskDeleteButton}>
 				<Text style={styles.deleteText}>Delete</Text>
 		</TouchableOpacity>
